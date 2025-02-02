@@ -276,4 +276,12 @@ class ParticleSwarmOptimizer:
             key=lambda r: r[7],
             default=None
         )
-        return {k: v for k, v in zip(header, best_feasible_solution)} if best_feasible_solution else None
+
+        if best_feasible_solution:
+            with open(f"{output_dir}/{filename}", mode="a", newline="") as file:
+                writer = csv.writer(file)
+                file.seek(0, 2)
+                if file.tell() == 0:  # If file is empty, write the header
+                    writer.writerow(header)
+                writer.writerow(best_feasible_solution)
+            return {k: v for k, v in zip(header, best_feasible_solution)}
