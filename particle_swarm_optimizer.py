@@ -178,7 +178,7 @@ class ParticleSwarmOptimizer:
 
         return self.global_best_position, self.global_best_value, history
     
-    def plot_convergence(self, all_histories: List[List[float]], title: str):
+    def plot_convergence(self, all_histories: List[List[float]], title: str, output_dir: str = ".", show_plot: bool = False):
         """Plot all individual runs, mean convergence trend, and save the figure."""
         max_len = max(len(h) for h in all_histories)
         histories_padded = [h + [h[-1]] * (max_len - len(h)) for h in all_histories]
@@ -219,11 +219,12 @@ class ParticleSwarmOptimizer:
         plt.title(full_title)
         plt.legend(loc='best', fontsize=9)
         plt.grid(True)
-        plt.savefig(f"{title}_convergence_n{self.n_particles}_w{self.w}_c1{self.c1}_c2{self.c2}_{self.penalty_method.name}_{penalty_params_filename}.png")
-        plt.show()
+        plt.savefig(f"{output_dir}/{title}_convergence_n{self.n_particles}_w{self.w}_c1{self.c1}_c2{self.c2}_{self.penalty_method.name}_{penalty_params_filename}.png")
+        if show_plot:
+            plt.show()
 
     
-    def save_best_solutions(self, best_solutions: List[Tuple[np.ndarray, float]], filename: str = "best_solutions.csv"):
+    def save_best_solutions(self, best_solutions: List[Tuple[np.ndarray, float]], filename: str = "best_solutions.csv", output_dir: str = ".") -> Optional[dict]:
         """Save the best solutions to a CSV file, appending new runs, and return the best feasible solution."""
         header = [
             "n_particles", "w", "c1", "c2", "penalty_method", "rho", "C", "alpha", "best_position", "objective_value"
@@ -256,7 +257,7 @@ class ParticleSwarmOptimizer:
             row.append(violated)
             rows.append(row)
 
-        with open(filename, mode="a", newline="") as file:
+        with open(f"{output_dir}/{filename}", mode="a", newline="") as file:
             writer = csv.writer(file)
             file.seek(0, 2)
             if file.tell() == 0:  # If file is empty, write the header
@@ -269,4 +270,4 @@ class ParticleSwarmOptimizer:
             key=lambda r: r[7],
             default=None
         )
-        return best_feasible_solution
+        return {k: v for k, v in zip(header, best_feasible_solution)} if best_feasible_solution else None
