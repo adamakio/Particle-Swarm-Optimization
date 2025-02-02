@@ -1,3 +1,10 @@
+"""
+bump_test_function.py
+~~~~~~~~~~~~~~~~~~~~~
+This file contains the implementation of the bump test function (P3) and its constraints.
+The hyperparameters of the Particle Swarm Optimizer are optimized using the 2D bump test function.
+"""
+
 import json
 import numpy as np
 from itertools import product

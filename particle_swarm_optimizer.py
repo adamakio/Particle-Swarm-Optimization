@@ -1,3 +1,9 @@
+"""
+particle_swarm_optimizer.py
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+This file contains the implementation of the Particle Swarm Optimization (PSO) algorithm with penalty methods.
+"""
+
 import csv
 import numpy as np
 from enum import Enum
