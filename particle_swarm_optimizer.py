@@ -230,7 +230,7 @@ class ParticleSwarmOptimizer:
             plt.show()
 
     
-    def save_best_solutions(self, best_solutions: List[Tuple[np.ndarray, float]], filename: str = "best_solutions.csv", output_dir: str = ".") -> Optional[dict]:
+    def save_best_solution(self, best_solution: np.ndarray, filename: str = "best_solutions.csv", output_dir: str = ".") -> Optional[dict]:
         """Save the best solutions to a CSV file, appending new runs, and return the best feasible solution."""
         header = [
             "n_particles", "w", "c1", "c2", "penalty_method", "rho", "C", "alpha", "best_position", "objective_value"
@@ -239,49 +239,36 @@ class ParticleSwarmOptimizer:
         header += [f"equality_{i}" for i in range(len(self.equality_constraints))]
         header += ["violated"]
 
-        rows = []
+        constraints_values = [g(best_solution) for g in self.inequality_constraints] + [h(best_solution) for h in self.equality_constraints]
+        violated = (
+            any(g > 0 for g in constraints_values[:len(self.inequality_constraints)]) 
+            or any(abs(h) > 1e-5 for h in constraints_values[len(self.inequality_constraints):])
+        )
+        penalty_params = [
+            self.penalty_method.static_penalty if self.penalty_method == PenaltyMethod.STATIC else "NA",
+            self.penalty_method.C if self.penalty_method == PenaltyMethod.ADAPTIVE else "NA", 
+            self.penalty_method.alpha if self.penalty_method == PenaltyMethod.ADAPTIVE else "NA"
+        ]
+        row = [
+            self.n_particles, self.w, self.c1, self.c2, self.penalty_method.name
+        ]
+        row += penalty_params
+        row += [
+            best_solution.tolist(), self.objective_func(best_solution)
+        ]
+        row += constraints_values
+        row.append(violated)
 
-        for position, _ in best_solutions:
-            constraints_values = [g(position) for g in self.inequality_constraints] + [h(position) for h in self.equality_constraints]
-            violated = (
-                any(g > 0 for g in constraints_values[:len(self.inequality_constraints)]) 
-                or any(abs(h) > 1e-5 for h in constraints_values[len(self.inequality_constraints):])
-            )
-            penalty_params = [
-                self.penalty_method.static_penalty if self.penalty_method == PenaltyMethod.STATIC else "NA",
-                self.penalty_method.C if self.penalty_method == PenaltyMethod.ADAPTIVE else "NA", 
-                self.penalty_method.alpha if self.penalty_method == PenaltyMethod.ADAPTIVE else "NA"
-            ]
-            row = [
-                self.n_particles, self.w, self.c1, self.c2, self.penalty_method.name
-            ]
-            row += penalty_params
-            row += [
-                position.tolist(), self.objective_func(position)
-            ]
-            row += constraints_values
-            row.append(violated)
-            rows.append(row)
-
+        
         with open(f"{output_dir}/{filename}", mode="a", newline="") as file:
             writer = csv.writer(file)
             file.seek(0, 2)
             if file.tell() == 0:  # If file is empty, write the header
                 writer.writerow(header)
-            writer.writerows(rows)
+            writer.writerow(row)
 
         # Find and return the best feasible solution
-        best_feasible_solution = min(
-            (row for row in rows if not row[-1]),
-            key=lambda r: r[7],
-            default=None
-        )
+        best_feasible_solution = row if not row[-1] else None
 
         if best_feasible_solution:
-            with open(f"{output_dir}/{filename}", mode="a", newline="") as file:
-                writer = csv.writer(file)
-                file.seek(0, 2)
-                if file.tell() == 0:  # If file is empty, write the header
-                    writer.writerow(header)
-                writer.writerow(best_feasible_solution)
             return {k: v for k, v in zip(header, best_feasible_solution)}

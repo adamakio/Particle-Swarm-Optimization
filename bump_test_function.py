@@ -41,7 +41,18 @@ space = [
 
 @use_named_args(space)
 def objective_function(penalty_method, n_particles, w, c1, c2, static_penalty, C, alpha):
-    best_solutions = []
+    # Set the penalty method parameters
+    if penalty_method == PenaltyMethod.STATIC:
+        penalty_method.set_static_penalty(static_penalty)
+    elif penalty_method == PenaltyMethod.ADAPTIVE:
+        penalty_method.set_adaptive_params(C, alpha)
+
+    # Record the overall best value
+    overall_best_solution = None
+    overall_best_value = None
+    histories = []
+
+    # Run the optimizer for multiple independent runs
     for run in range(independent_runs):
         pso = ParticleSwarmOptimizer(
             objective_func=bump_test_function,
@@ -57,18 +68,23 @@ def objective_function(penalty_method, n_particles, w, c1, c2, static_penalty, C
             log_level=LogLevel.NONE
         )
 
-        if penalty_method == PenaltyMethod.STATIC:
-            pso.penalty_method.set_static_penalty(static_penalty)
-        elif penalty_method == PenaltyMethod.ADAPTIVE:
-            pso.penalty_method.set_adaptive_params(C, alpha)
+        best_solution, best_value, history = pso.optimize(n_iterations=200, tol=1e-5, patience=25)
+        histories.append(history)
+        if overall_best_solution is None or best_value < overall_best_value:
+            overall_best_solution = best_solution
+            overall_best_value = best_value
 
-        best_position, best_value, _ = pso.optimize(n_iterations=100, tol=1e-6, patience=20)
-        best_solutions.append((best_position, best_value))
+    # Save the best solutions to a CSV file
+    best_feasible_solution = pso.save_best_solution(overall_best_solution, filename="best_solutions_P3_2D.csv", output_dir="best_solutions")
 
-    return pso.save_best_solutions(best_solutions, filename="best_solutions_P3_2D.csv", output_dir="best_solutions")["objective_value"]
+    # Plot the histories for all runs
+    pso.plot_convergence(histories, title="P3 2D", output_dir="convergence_plots")
+
+    # Return the overall best value
+    return best_feasible_solution["objective_value"] if best_feasible_solution is not None else np.inf
 
 def hyperparameter_search():
-    res = gp_minimize(objective_function, space, n_calls=50, n_random_starts=10, random_state=42)
+    res = gp_minimize(objective_function, space, n_calls=200, n_random_starts=20, random_state=42, n_jobs=-1)
     best_hyperparameters = res.x
     print("Best hyperparameters:", best_hyperparameters)
 
