@@ -194,11 +194,12 @@ class ParticleSwarmOptimizer:
         mean_values = np.mean(histories_array, axis=0)
         std_values = np.std(histories_array, axis=0)
 
-        plt.figure(figsize=(12, 8))
+        # Improve plot aesthetics
+        plt.figure(figsize=(10, 6), dpi=300)  # Higher DPI for better quality in LaTeX
 
         # Plot all individual runs
         for idx, run in enumerate(histories_array):
-            plt.plot(run, alpha=0.5, linestyle='--', label=f'Run {idx + 1}')
+            plt.plot(run, alpha=0.5, linestyle='--', linewidth=0.8, label=f'Run {idx + 1}')
 
         # Plot mean and standard deviation
         plt.plot(mean_values, label="Mean Convergence Trend", linewidth=2, color='black')
@@ -211,8 +212,16 @@ class ParticleSwarmOptimizer:
             color='gray',
         )
 
-        plt.xlabel("Iteration")
-        plt.ylabel("Objective Value")
+        plt.xlabel("Iteration", fontsize=12, labelpad=1)
+        plt.ylabel("Objective Value", fontsize=12, labelpad=1)
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
+
+        # Grid and frame adjustments
+        plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
+        plt.tight_layout()  # Ensures the plot fits well in the figure
+
+
         if self.penalty_method == PenaltyMethod.STATIC:
             penalty_params = {"rho": self.penalty_method.static_penalty}
         elif self.penalty_method == PenaltyMethod.ADAPTIVE:
@@ -223,14 +232,17 @@ class ParticleSwarmOptimizer:
             f"Particle Swarm Optimization Convergence: {title} "
             f"n_particles={self.n_particles}, w={self.w}, c1={self.c1}, c2={self.c2}, penalty_method={self.penalty_method.name}, {penalty_params_str}"
         )
-        plt.title(full_title)
-        plt.legend(loc='best', fontsize=9)
+        # plt.title(full_title)
+        plt.legend(loc="best", fontsize=10, frameon=True, edgecolor="black")
         plt.grid(True)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        plt.savefig(f"{output_dir}/{title}_convergence_n{self.n_particles}_w{self.w}_c1{self.c1}_c2{self.c2}_{self.penalty_method.name}_{penalty_params_filename}.png")
+        filepath = f"{output_dir}/{title}_convergence_n{self.n_particles}_w{self.w}_c1{self.c1}_c2{self.c2}_{self.penalty_method.name}_{penalty_params_filename}.png"
+        plt.savefig(filepath)
         if show_plot:
             plt.show()
+
+        return filepath
 
     
     def save_best_solution(self, best_solution: np.ndarray, filename: str = "best_solutions.csv", output_dir: str = ".") -> Optional[dict]:

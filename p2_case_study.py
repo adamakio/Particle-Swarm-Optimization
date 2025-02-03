@@ -1,13 +1,20 @@
 import numpy as np
 from particle_swarm_optimizer import ParticleSwarmOptimizer, PenaltyMethod, LogLevel
 
-# Define the Rosenbrock function for P1
-def rosenbrock_function(x: np.ndarray) -> float:
-    return sum(100 * (x[i + 1] - x[i]**2)**2 + (1 - x[i])**2 for i in range(len(x) - 1))
+# Define the objective function for P2
+def p2_objective_function(x: np.ndarray) -> float:
+    return x[0]**2 + 0.5 * x[0] + 3 * x[0] * x[1] + 5 * x[1]**2
+
+# Define the inequality constraints for P2
+def inequality_constraint1(x: np.ndarray) -> float:
+    return 3 * x[0] + 2 * x[1] + 2
+
+def inequality_constraint2(x: np.ndarray) -> float:
+    return 15 * x[0] - 3 * x[1] - 1
 
 # Problem parameters
-n_dimensions = 5  # You can also set n_dimensions = 5 for the other case
-bounds = (-5, 5)
+n_dimensions = 2
+bounds = (-1, 1)
 independent_runs = 10
 
 # Hyperparameters for the optimizer
@@ -30,9 +37,9 @@ for run in range(independent_runs):
     print(f"Run {run + 1}/{independent_runs}")
     
     pso = ParticleSwarmOptimizer(
-        objective_func=rosenbrock_function,
-        inequality_constraints=[],  # No constraints for P1
-        equality_constraints=[],    # No constraints for P1
+        objective_func=p2_objective_function,
+        inequality_constraints=[inequality_constraint1, inequality_constraint2],
+        equality_constraints=[],  # No equality constraints in P2
         n_dimensions=n_dimensions,
         bounds=bounds,
         n_particles=n_particles,
@@ -44,11 +51,12 @@ for run in range(independent_runs):
     )
     
     # Optimize
-    best_solution, best_value, history = pso.optimize(n_iterations=1000, tol=1e-5, patience=25)
+    best_solution, best_value, history = pso.optimize(n_iterations=200, tol=1e-5, patience=25)
     histories.append(history)
     
-    # Update the overall best solution
-    if best_value < overall_best_value:
+    # Check if the solution is feasible
+    is_feasible = all(g(best_solution) <= 0 for g in [inequality_constraint1, inequality_constraint2])
+    if is_feasible and best_value < overall_best_value:
         overall_best_solution = best_solution
         overall_best_value = best_value
 
@@ -57,5 +65,5 @@ print("Best solution:", overall_best_solution)
 print("Best objective value:", overall_best_value)
 
 # Plot the convergence trends
-filepath = pso.plot_convergence(histories, title=f"P1_{n_dimensions}D", output_dir="best_plots")
-print(f"Convergence plot for P1 {n_dimensions}D saved to", filepath)
+filepath = pso.plot_convergence(histories, title=f"P2_{n_dimensions}D", output_dir="best_plots")
+print(f"Convergence plot for P2 saved to {filepath}")

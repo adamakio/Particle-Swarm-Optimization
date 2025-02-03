@@ -1,15 +1,4 @@
-"""
-bump_test_function.py
-~~~~~~~~~~~~~~~~~~~~~
-This file contains the implementation of the bump test function (P3) and its constraints.
-The hyperparameters of the Particle Swarm Optimizer are optimized using the 2D bump test function.
-"""
-
-import json
 import numpy as np
-from skopt import gp_minimize
-from skopt.space import Real, Integer, Categorical
-from skopt.utils import use_named_args
 from particle_swarm_optimizer import ParticleSwarmOptimizer, PenaltyMethod, LogLevel
 
 # Define the objective function and constraints for P3
@@ -24,69 +13,66 @@ def inequality_constraint1(x: np.ndarray) -> float:
 def inequality_constraint2(x: np.ndarray) -> float:
     return np.sum(x) - (15 * len(x) / 2)
 
-n_dimensions = 2
+# Problem parameters
+n_dimensions = 10
 bounds = (0, 10)
 independent_runs = 10
 
-space = [
-    Categorical([PenaltyMethod.STATIC, PenaltyMethod.ADAPTIVE], name='penalty_method'),
-    Integer(10, 60, name='n_particles'),
-    Real(0.4, 1.4, name='w'),
-    Real(1.5, 2.0, name='c1'),
-    Real(2.0, 2.5, name='c2'),
-    Real(1e2, 1e4, name='static_penalty'),
-    Real(0.5, 1.0, name='C'),
-    Real(1.0, 2.0, name='alpha')
-]
+# Hyperparameters for the optimizer
+n_particles = 59
+w = 0.406
+c1 = 1.527
+c2 = 2.135
+static_penalty = 7535
 
-@use_named_args(space)
-def objective_function(penalty_method, n_particles, w, c1, c2, static_penalty, C, alpha):
-    # Set the penalty method parameters
-    if penalty_method == PenaltyMethod.STATIC:
-        penalty_method.set_static_penalty(static_penalty)
-    elif penalty_method == PenaltyMethod.ADAPTIVE:
-        penalty_method.set_adaptive_params(C, alpha)
+# Set up the static penalty method
+penalty_method = PenaltyMethod.STATIC
+penalty_method.set_static_penalty(static_penalty)
 
-    # Record the overall best value
-    overall_best_solution = None
-    overall_best_value = None
-    histories = []
+# Perform 10 independent runs and store the results
+overall_best_solution = None
+overall_best_value = float('inf')
+overall_best_constraint1 = None
+overall_best_constraint2 = None
+histories = []
 
-    # Run the optimizer for multiple independent runs
-    for run in range(independent_runs):
-        pso = ParticleSwarmOptimizer(
-            objective_func=bump_test_function,
-            inequality_constraints=[inequality_constraint1, inequality_constraint2],
-            equality_constraints=[],
-            n_dimensions=n_dimensions,
-            bounds=bounds,
-            n_particles=n_particles,
-            w=w,
-            c1=c1,
-            c2=c2,
-            penalty_method=penalty_method,
-            log_level=LogLevel.INFO
-        )
+for run in range(independent_runs):
+    print(f"Run {run + 1}/{independent_runs}")
 
-        best_solution, best_value, history = pso.optimize(n_iterations=200, tol=1e-5, patience=25)
-        histories.append(history)
-        if overall_best_solution is None or best_value < overall_best_value:
-            overall_best_solution = best_solution
-            overall_best_value = best_value
+    pso = ParticleSwarmOptimizer(
+        objective_func=bump_test_function,
+        inequality_constraints=[inequality_constraint1, inequality_constraint2],
+        equality_constraints=[],  # No equality constraints in P3
+        n_dimensions=n_dimensions,
+        bounds=bounds,
+        n_particles=n_particles,
+        w=w,
+        c1=c1,
+        c2=c2,
+        penalty_method=penalty_method,
+        log_level=LogLevel.DEBUG
+    )
 
-    # Save the best solutions to a CSV file
-    pso.save_best_solution(overall_best_solution, filename="best_solutions_P3_2D.csv", output_dir="best_solutions")
+    # Optimize
+    best_solution, best_value, history = pso.optimize(n_iterations=500, tol=1e-5, patience=25)
+    histories.append(history)
 
-    # Plot the histories for all runs
-    pso.plot_convergence(histories, title="P3_2D", output_dir="convergence_plots")
+    # Check if the solution is feasible
+    inequality_constraint1_value = inequality_constraint1(best_solution)
+    inequality_constraint2_value = inequality_constraint2(best_solution)
+    is_feasible = inequality_constraint1_value < 0 and inequality_constraint2_value <= 0
+    if is_feasible and best_value < overall_best_value:
+        overall_best_solution = best_solution
+        overall_best_value = best_value
+        overall_best_constraint1 = inequality_constraint1_value
+        overall_best_constraint2 = inequality_constraint2_value
 
-    # Return the overall best value
-    return overall_best_value
+# Print the best solution and value
+print("Best solution:", overall_best_solution)
+print("Best objective value:", overall_best_value)
+print("Best constraint 1 value:", overall_best_constraint1)
+print("Best constraint 2 value:", overall_best_constraint2)
 
-def hyperparameter_search():
-    res = gp_minimize(objective_function, space, n_calls=200, n_random_starts=20, random_state=42, n_jobs=-1)
-    best_hyperparameters = res.x
-    print("Best hyperparameters:", best_hyperparameters)
-
-if __name__ == "__main__":
-    hyperparameter_search()
+# Plot the convergence trends
+filepath = pso.plot_convergence(histories, title=f"P3_{n_dimensions}D", output_dir="best_plots")
+print(f"Convergence plot P3 n=10 saved to {filepath}")
