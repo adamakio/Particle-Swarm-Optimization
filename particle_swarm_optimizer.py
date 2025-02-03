@@ -3,8 +3,9 @@ particle_swarm_optimizer.py
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 This file contains the implementation of the Particle Swarm Optimization (PSO) algorithm with penalty methods.
 """
-
+import os
 import csv
+import json
 import numpy as np
 from enum import Enum
 from typing import Callable, List, Tuple, Union, Optional
@@ -169,7 +170,7 @@ class ParticleSwarmOptimizer:
             self.update_positions_and_velocities()
             history.append(self.global_best_value)
 
-            if self.log_level >= LogLevel.INFO:
+            if self.log_level >= LogLevel.DEBUG:
                 print(f"Iteration {t + 1}: Best value = {self.global_best_value}")
 
             # Stopping criteria: tolerance for consecutive iterations
@@ -225,6 +226,8 @@ class ParticleSwarmOptimizer:
         plt.title(full_title)
         plt.legend(loc='best', fontsize=9)
         plt.grid(True)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
         plt.savefig(f"{output_dir}/{title}_convergence_n{self.n_particles}_w{self.w}_c1{self.c1}_c2{self.c2}_{self.penalty_method.name}_{penalty_params_filename}.png")
         if show_plot:
             plt.show()
@@ -259,7 +262,11 @@ class ParticleSwarmOptimizer:
         row += constraints_values
         row.append(violated)
 
-        
+        # Create directory if it does not exist
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # Write row to CSV file
         with open(f"{output_dir}/{filename}", mode="a", newline="") as file:
             writer = csv.writer(file)
             file.seek(0, 2)
@@ -267,8 +274,8 @@ class ParticleSwarmOptimizer:
                 writer.writerow(header)
             writer.writerow(row)
 
-        # Find and return the best feasible solution
-        best_feasible_solution = row if not row[-1] else None
 
-        if best_feasible_solution:
-            return {k: v for k, v in zip(header, best_feasible_solution)}
+        # Print added row
+        if self.log_level >= LogLevel.INFO:
+            print("Saved best solution:")
+            [print(f"{k}: {v}") for k, v in zip(header, row)]

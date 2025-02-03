@@ -65,7 +65,7 @@ def objective_function(penalty_method, n_particles, w, c1, c2, static_penalty, C
             c1=c1,
             c2=c2,
             penalty_method=penalty_method,
-            log_level=LogLevel.NONE
+            log_level=LogLevel.INFO
         )
 
         best_solution, best_value, history = pso.optimize(n_iterations=200, tol=1e-5, patience=25)
@@ -75,13 +75,13 @@ def objective_function(penalty_method, n_particles, w, c1, c2, static_penalty, C
             overall_best_value = best_value
 
     # Save the best solutions to a CSV file
-    best_feasible_solution = pso.save_best_solution(overall_best_solution, filename="best_solutions_P3_2D.csv", output_dir="best_solutions")
+    pso.save_best_solution(overall_best_solution, filename="best_solutions_P3_2D.csv", output_dir="best_solutions")
 
     # Plot the histories for all runs
-    pso.plot_convergence(histories, title="P3 2D", output_dir="convergence_plots")
+    pso.plot_convergence(histories, title="P3_2D", output_dir="convergence_plots")
 
     # Return the overall best value
-    return best_feasible_solution["objective_value"] if best_feasible_solution is not None else np.inf
+    return overall_best_value
 
 def hyperparameter_search():
     res = gp_minimize(objective_function, space, n_calls=200, n_random_starts=20, random_state=42, n_jobs=-1)
