@@ -3,6 +3,25 @@
 ## Description
 This repository contains the code for Assignment 1 of the AER1415 course. This code implements the Particle Swarm Optimization algorithm and is tested on multiple case studies. The hyperparameters are optimized on the 2D bump test function and applied to the remaining problems.
 
+## Prerequisites
+Before running the code, ensure you have the following software installed:
+- Python 3.9.18
+- Required Python packages (listed in `requirements.txt`)
+
+## Installation
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/AER1415-Assignment1.git
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd AER1415-Assignment1
+    ```
+3. Install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
 ## Running Specific Scripts
 - To obtain the optimal hyperparameters, run:
     ```bash
@@ -36,38 +55,8 @@ The answer to the bonus question is found in `best_solution_P3_n50.txt` and can 
     python verify_P3_n50.py
     ```
 
-## Prerequisites
-Before running the code, ensure you have the following software installed:
-- Python 3.9.18
-- Required Python packages (listed in `requirements.txt`)
-
-## Installation
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/AER1415-Assignment1.git
-    ```
-2. Navigate to the project directory:
-    ```bash
-    cd AER1415-Assignment1
-    ```
-3. Install the required packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## Usage
-To run the code, execute the following command in the terminal:
-```bash
-python main.py
-```
-
-## Files
-- `main.py`: The main script to run the code.
-- `requirements.txt`: A list of Python packages required to run the code.
-- `README.md`: This file.
-
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
 
 ## Contact
-For any questions or issues, please contact [your email].
+For any questions or issues, please contact adamhamaimou@gmail.com.
