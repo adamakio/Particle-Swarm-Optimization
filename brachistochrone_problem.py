@@ -4,7 +4,7 @@ from particle_swarm_optimizer import ParticleSwarmOptimizer, PenaltyMethod, LogL
 
 # Problem parameters
 h = 1  # Height of the starting point
-n = 15 # Number of points (excluding the fixed points)
+n = 30 # Number of points (including the fixed points)
 independent_runs = 10
 bounds = (0, 1)  # Bounds for y_i
 
@@ -66,73 +66,82 @@ def compare_solutions(n: int, numerical_y: np.ndarray):
     # Compute the differences
     y_difference = y_numerical - np.interp(x_numerical, x_analytical, y_analytical)
 
-    # Plot comparison
-    plt.figure(figsize=(10, 6))
-    plt.plot(x_analytical, y_analytical, label="Analytical Solution", linewidth=2)
-    plt.plot(x_numerical, y_numerical, 'o-', label="Numerical Solution (PSO)", markersize=6)
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.title(f"Comparison of Analytical and Numerical Solutions for n = {n}")
-    plt.legend()
+   # Plot comparison
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_analytical, y_analytical, label="Analytical Solution", linewidth=2, color='blue')
+    plt.plot(x_numerical, y_numerical, 'o-', label="Numerical Solution (PSO)", markersize=6, color='orange')
+    plt.xlabel(r"$x$", fontsize=12)
+    plt.ylabel(r"$y$", fontsize=12)
+    # plt.title(f"Brachistochrone Problem: Comparison for $n = {n}$", fontsize=14)
+    plt.legend(fontsize=10)
     plt.grid(True)
+
+    # Save the figure
+    filepath = f"best_plots/P4_comparison_n{n}.png"
+    plt.savefig(filepath, dpi=300, bbox_inches="tight")
     plt.show()
+    plt.close()
+    print(f"Comparison plot saved to {filepath}")
 
     # Print comparison statistics
     max_difference = np.max(np.abs(y_difference))
     print(f"Maximum difference between analytical and numerical solutions for n = {n}: {max_difference:.6f}")
 
-# Hyperparameters for the optimizer
-n_particles = 59
-w = 0.406
-c1 = 1.527
-c2 = 2.135
-static_penalty = 7535
+if __name__ == '__main__':
+    # Hyperparameters for the optimizer
+    n_particles = 59
+    w = 0.406
+    c1 = 1.527
+    c2 = 2.135
+    static_penalty = 7535
 
-print(f"Solving Brachistochrone problem for n = {n}...")
-n_dimensions = n - 2  # Number of design variables
+    print(f"Solving Brachistochrone problem for n = {n}...")
+    n_dimensions = n - 2  # Number of design variables
 
-# Set up the static penalty method
-penalty_method = PenaltyMethod.STATIC
-penalty_method.set_static_penalty(static_penalty)
+    # Set up the static penalty method
+    penalty_method = PenaltyMethod.STATIC
+    penalty_method.set_static_penalty(static_penalty)
 
-# Perform independent runs and store the results
-overall_best_solution = None
-overall_best_value = float('inf')
-histories = []
+    # Perform independent runs and store the results
+    overall_best_solution = None
+    overall_best_value = float('inf')
+    histories = []
 
-for run in range(independent_runs):
-    print(f"Run {run + 1}/{independent_runs}")
+    for run in range(independent_runs):
+        print(f"Run {run + 1}/{independent_runs}")
 
-    pso = ParticleSwarmOptimizer(
-        objective_func=brachistochrone_objective,
-        inequality_constraints=[],  # No inequality constraints
-        equality_constraints=[],  # No equality constraints
-        n_dimensions=n_dimensions,
-        bounds=bounds,
-        n_particles=n_particles,
-        w=w,
-        c1=c1,
-        c2=c2,
-        penalty_method=penalty_method,
-        log_level=LogLevel.DEBUG
-    )
+        pso = ParticleSwarmOptimizer(
+            objective_func=brachistochrone_objective,
+            inequality_constraints=[],  # No inequality constraints
+            equality_constraints=[],  # No equality constraints
+            n_dimensions=n_dimensions,
+            bounds=bounds,
+            n_particles=n_particles,
+            w=w,
+            c1=c1,
+            c2=c2,
+            penalty_method=penalty_method,
+            log_level=LogLevel.NONE
+        )
 
-    # Optimize
-    best_solution, best_value, history = pso.optimize(n_iterations=500, tol=1e-5, patience=25)
-    histories.append(history)
+        # Optimize
+        best_solution, best_value, history = pso.optimize(n_iterations=1500, tol=1e-5, patience=50)
+        histories.append(history)
 
-    # Update the overall best solution
-    if best_value < overall_best_value:
-        overall_best_solution = best_solution
-        overall_best_value = best_value
+        # Update the overall best solution
+        if best_value < overall_best_value:
+            overall_best_solution = best_solution
+            overall_best_value = best_value
 
-# Print the best solution and value
-print(f"Best solution for n = {n}:", np.concatenate(([1], overall_best_solution, [0])))
-print(f"Best objective value for n = {n}:", overall_best_value)
+    # Print the best solution and value
+    print(f"Best solution for n = {n}:", np.concatenate(([1], overall_best_solution, [0])))
+    print(f"Best objective value for n = {n}:", overall_best_value)
 
-# Compare the numerical solution with the analytical solution
-compare_solutions(n, overall_best_solution)
+    # Compare the numerical solution with the analytical solution
+    compare_solutions(n, overall_best_solution)
 
-# Plot the convergence trends
-filepath = pso.plot_convergence(histories, title=f"P4_{n}D", output_dir="best_plots")
-print(f"Convergence plot P4 n={n} saved to {filepath}")
+    # Plot the convergence trends
+    filepath = pso.plot_convergence(histories, title=f"P4_{n}D", output_dir="best_plots")
+    print(f"Convergence plot P4 n={n} saved to {filepath}")
+
+

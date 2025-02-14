@@ -116,6 +116,8 @@ class ParticleSwarmOptimizer:
 
     def penalty_function(self, x: np.ndarray, iteration: int) -> float:
         """Calculate penalty for constraint violations."""
+        if not self.inequality_constraints and not self.equality_constraints:
+            return 0.0
         inequality_violation = np.sum([max(0, g(x))**2 for g in self.inequality_constraints])
         equality_violation = np.sum([h(x)**2 for h in self.equality_constraints])
         total_violation = inequality_violation + equality_violation
