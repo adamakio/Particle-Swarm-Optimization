@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     if n_dimensions == 50:
         # Save the best solution and corresponding x* values to an ASCII file
-        output_filename = "best_solution_P3_n50_2.txt"
+        output_filename = "best_solution_P3_n50.txt"
 
         with open(output_filename, "w") as file:
             file.write("Best solution found for P3 with n=50\n")

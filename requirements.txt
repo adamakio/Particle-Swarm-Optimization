@@ -1,0 +1,4 @@
+matplotlib==3.10.0
+numpy==1.15.1
+pandas==1.5.3
+scikit_optimize==0.10.2

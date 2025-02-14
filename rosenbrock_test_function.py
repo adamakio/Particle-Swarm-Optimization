@@ -6,7 +6,7 @@ def rosenbrock_function(x: np.ndarray) -> float:
     return sum(100 * (x[i + 1] - x[i]**2)**2 + (1 - x[i])**2 for i in range(len(x) - 1))
 
 # Problem parameters
-n_dimensions = 5  # You can also set n_dimensions = 5 for the other case
+n_dimensions = 5  # You can also set n_dimensions = 2 for the other case
 bounds = (-5, 5)
 independent_runs = 10
 
