@@ -1,0 +1,13 @@
+\begin{table}[h]
+\centering
+\caption{Top 3 Hyperparameter Configurations for ADAPTIVE Penalty Method}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+Swarm size & $w$ & $c_1$ & $c_2$ & $C$ & $\alpha$ & Best solution & Function value \\
+\hline
+42 & 0.625 & 1.968 & 2.001 & 0.50 & 1.94 & [1.59319, 0.48156] & -0.35564 \\
+60 & 0.726 & 1.988 & 2.003 & 0.57 & 1.98 & [1.68511, 0.46405] & -0.34221 \\
+59 & 1.355 & 1.974 & 2.481 & 0.98 & 1.44 & [1.50011, 0.53947] & -0.31763 \\
+\hline
+\end{tabular}
+\end{table}

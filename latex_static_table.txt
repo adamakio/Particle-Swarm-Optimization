@@ -1,0 +1,13 @@
+\begin{table}[h]
+\centering
+\caption{Top 3 Hyperparameter Configurations for STATIC Penalty Method}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Swarm size & $w$ & $c_1$ & $c_2$ & $\rho$ & Best solution & Function value \\
+\hline
+59 & 0.406 & 1.527 & 2.135 & 7535 & [1.60088, 0.4685] & -0.36498 \\
+59 & 0.499 & 1.527 & 2.014 & 2855 & [1.60076, 0.46854] & -0.36497 \\
+13 & 0.412 & 1.985 & 2.071 & 9414 & [1.60133, 0.46861] & -0.36477 \\
+\hline
+\end{tabular}
+\end{table}
