@@ -11,11 +11,11 @@ Before running the code, ensure you have the following software installed:
 ## Installation
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/AER1415-Assignment1.git
+    git clone https://github.com/adamakio/Particle-Swarm-Optimization.git
     ```
 2. Navigate to the project directory:
     ```bash
-    cd AER1415-Assignment1
+    cd Particle-Swarm-Optimization
     ```
 3. Install the required packages:
     ```bash
