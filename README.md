@@ -40,7 +40,6 @@ Before running the code, ensure you have the following software installed:
     python bump_test_function.py
     ```
 - To run P4, set `n` in the script `brachistochrone_problem.py` to `n=15` or `n=30` and execute:
-    ```
     ```bash
     python brachistochrone_problem.py
     ```
